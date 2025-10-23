@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "framework": "nextjs",
+  "env": {
+    "NEXT_PUBLIC_API_BASE": "https://smartia-api-642830139828.us-central1.run.app"
+  }
+}

@@ -63,3 +63,4 @@ coverage/
 out/
 build/
 dist/
+.vercel
