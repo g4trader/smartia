@@ -1,0 +1,17 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build','-t','gcr.io/$PROJECT_ID/smartia-agents-api:$SHORT_SHA','services/api']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push','gcr.io/$PROJECT_ID/smartia-agents-api:$SHORT_SHA']
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - smartia-agents-api
+      - --image=gcr.io/$PROJECT_ID/smartia-agents-api:$SHORT_SHA
+      - --region=$LOCATION
+      - --allow-unauthenticated
+      - --port=8080
+images:
+  - gcr.io/$PROJECT_ID/smartia-agents-api:$SHORT_SHA

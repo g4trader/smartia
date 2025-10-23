@@ -1,1 +1,0 @@
-# SmartIA API package

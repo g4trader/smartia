@@ -1,0 +1,78 @@
+name: Deploy API to Cloud Run
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/api/**'
+      - 'infra/cloudbuild.yaml'
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: ${{ secrets.GCP_REGION || 'us-central1' }}
+  SERVICE_NAME: smartia-agents-api
+
+jobs:
+  deploy:
+    name: Deploy to Cloud Run
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+      
+      - name: Configure Docker to use gcloud as a credential helper
+        run: gcloud auth configure-docker
+      
+      - name: Build and push Docker image
+        run: |
+          # Build image
+          docker build -t gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA ./services/api
+          
+          # Push image
+          docker push gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA
+      
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy $SERVICE_NAME \
+            --image gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA \
+            --region $REGION \
+            --platform managed \
+            --allow-unauthenticated \
+            --port 8080 \
+            --memory 512Mi \
+            --cpu 1 \
+            --max-instances 10 \
+            --set-env-vars MOCK_MODE=true,ALLOW_ORIGINS=* \
+            --quiet
+      
+      - name: Get service URL
+        id: get-url
+        run: |
+          SERVICE_URL=$(gcloud run services describe $SERVICE_NAME --region=$REGION --format='value(status.url)')
+          echo "service_url=$SERVICE_URL" >> $GITHUB_OUTPUT
+          echo "Service deployed at: $SERVICE_URL"
+      
+      - name: Health check
+        run: |
+          sleep 30
+          curl -f "${{ steps.get-url.outputs.service_url }}/health" || exit 1
+      
+      - name: Comment deployment URL on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 API deployed successfully!\n\n**Service URL:** ${{ steps.get-url.outputs.service_url }}\n**Health Check:** ${{ steps.get-url.outputs.service_url }}/health`
+            })

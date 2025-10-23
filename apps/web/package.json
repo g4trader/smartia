@@ -1,22 +1,38 @@
 {
-  "name": "@smartia/web",
+  "name": "smartia-web",
   "private": true,
-  "version": "0.1.0",
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "next dev",
     "build": "next build",
-    "start": "next start -p 3000",
-    "lint": "next lint"
+    "start": "next start",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "next": "14.2.5",
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "classnames": "2.5.1",
+    "zod": "3.23.8"
   },
   "devDependencies": {
-    "typescript": "^5.6.2",
-    "@types/node": "^20.12.7",
-    "@types/react": "^18.2.66",
-    "@types/react-dom": "^18.2.23"
+    "@types/node": "20.11.30",
+    "@types/react": "18.2.61",
+    "@types/react-dom": "18.2.19",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "10.4.19",
+    "eslint": "8.57.0",
+    "eslint-config-next": "14.2.5",
+    "eslint-config-prettier": "^9.1.0",
+    "postcss": "8.4.35",
+    "prettier": "^3.3.3",
+    "tailwindcss": "3.4.4",
+    "typescript": "5.4.5",
+    "vitest": "1.6.0"
   }
 }

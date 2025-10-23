@@ -1,283 +1,188 @@
-# SmartIA - Clínica Inteligente
+# SmartIA WhatsApp Agents – Landing + Mock Platform
 
-Sistema completo de automação para clínicas com IA integrada ao WhatsApp, agendamento automático, CRM e lembretes.
+Monorepo com **Landing Page** (Next.js + Vercel) e **API Mock** (Flask + Cloud Run) para demonstrar agentes de IA no WhatsApp com **state machine** inteligente.
 
-## 🚀 Funcionalidades
+## 🤖 Agentes Disponíveis
+- **Agent SDR** - Qualificação de leads e vendas
+- **Agent E‑commerce** - FAQ, catálogo e checkout por link  
+- **Agent Autoatendimento** - Agendamentos, CRM e pagamentos
+- **Agent RFM** - Reativação por cluster de comportamento (Recency, Frequency, Monetary)
 
-### ✅ Landing Page Refinada
-- **Componentes reutilizáveis**: Hero, ComoFunciona, Beneficios, Planos, FAQ
-- **Meta tags Open Graph**: Otimizada para redes sociais
-- **Seção Smart IA Sprint**: Integração rápida em 30 dias
-- **FAQ completo**: 6 perguntas frequentes sobre integrações, prazos, suporte
-- **Design responsivo**: Layout adaptável para todos os dispositivos
-
-### ✅ Fluxo de Webhook Completo
-- **Parser Meta Cloud API**: Processamento de mensagens, botões e status
-- **FlowOrchestrator**: Estados NEW_INTENT → ASK_DATE → ASK_TIME → CONFIRM → DONE
-- **Detecção de intenções**: agendar, remarcar, cancelar, dúvidas
-- **Persistência SQLite**: Conversas e estados salvos automaticamente
-- **Envio de mensagens**: Integração com WhatsApp via Meta API
-
-### ✅ Integração com Google Calendar
-- **CalendarService plugável**: Interface clara para trocar provedores
-- **Métodos CRUD**: list_slots, book_slot, cancel_event, get_event
-- **OAuth2**: Autenticação segura com Google
-- **Timezone configurável**: Suporte a diferentes fusos horários
-- **Conflitos automáticos**: Verificação de disponibilidade
-
-### ✅ CRM Mínimo Viável
-- **Modelos completos**: Patient, Interaction, Appointment
-- **Endpoints REST**: GET /patients, GET /appointments, GET /metrics
-- **Métricas avançadas**: Taxa de confirmação, lead→consulta, faltas
-- **Histórico completo**: Todas as interações salvas
-- **Serialização**: Pronto para dashboard frontend
-
-### ✅ Provedores Alternativos
-- **Estratégia plugável**: Meta, Twilio, Zenvia
-- **Injeção por ENV**: Configuração via variáveis de ambiente
-- **Endpoints genéricos**: /webhook/{provider}
-- **Factory pattern**: Criação dinâmica de provedores
-- **Backward compatibility**: Endpoints legados mantidos
-
-### ✅ Sistema de Lembretes e No-Shows
-- **Jobs automatizados**: Lembretes 24h e 2h antes
-- **No-show handler**: Marcação automática de faltas
-- **Reengajamento**: Mensagens para pacientes que faltaram
-- **Métricas detalhadas**: Taxa de faltas, conclusão, lembretes
-- **Execução flexível**: Script, cron, Cloud Scheduler, Cloud Run Jobs
-
-## 🏗️ Arquitetura
-
+## 🏗️ Estrutura do Projeto
 ```
-smartia/
-├── apps/
-│   ├── web/                 # Next.js Frontend
-│   │   ├── components/      # Componentes reutilizáveis
-│   │   ├── pages/          # Páginas da aplicação
-│   │   └── package.json    # Dependências frontend
-│   └── api/                # FastAPI Backend
-│       ├── models/         # Modelos SQLAlchemy
-│       ├── parsers/        # Parsers de webhook
-│       ├── orchestrator/   # Fluxo de conversação
-│       ├── services/       # Serviços (Calendar, etc)
-│       ├── providers/      # Provedores WhatsApp
-│       ├── jobs/           # Jobs de automação
-│       └── tests/          # Testes unitários
-├── packages/
-│   └── shared/             # Código compartilhado
-└── README.md
+apps/web/              # Next.js (Landing + Demo chat interativo)
+├── app/               # App Router (Next.js 14)
+├── components/        # Componentes React
+├── tests/            # Testes com Vitest
+└── package.json      # Dependências e scripts
+
+services/api/          # Flask API (State Machine + Webhooks)
+├── app.py            # API principal com state machines
+├── tests/            # Testes com pytest
+├── requirements.txt  # Dependências Python
+└── Dockerfile        # Container para Cloud Run
+
+.github/workflows/     # CI/CD GitHub Actions
+├── ci.yml            # Lint, test e build
+├── deploy-api.yml    # Deploy para Cloud Run
+└── deploy-web.yml    # Deploy para Vercel
+
+infra/                 # Configurações de infraestrutura
+├── cloudbuild.yaml   # Google Cloud Build
+└── vercel.json       # Configuração Vercel
 ```
 
-## 🛠️ Tecnologias
+## 🚀 Deploy Automatizado
 
-### Frontend
-- **Next.js 14**: Framework React com pages router
-- **TypeScript**: Tipagem estática
-- **CSS Inline**: Estilos simples e responsivos
+### Pré-requisitos
+Configure os seguintes secrets no GitHub:
+- `GITHUB_TOKEN` - Token com permissão de repo
+- `VERCEL_TOKEN` - Token do Vercel CLI
+- `VERCEL_ORG_ID` - ID da organização Vercel
+- `VERCEL_PROJECT_ID` - ID do projeto Vercel
+- `GOOGLE_APPLICATION_CREDENTIALS` - JSON das credenciais GCP
+- `GCP_PROJECT_ID` - ID do projeto Google Cloud
+- `GCP_REGION` - Região do Cloud Run (padrão: us-central1)
+- `NEXT_PUBLIC_API_BASE` - URL da API no Cloud Run
 
-### Backend
-- **FastAPI**: API moderna e rápida
-- **SQLAlchemy**: ORM para banco de dados
-- **SQLite**: Banco de dados local (configurável)
-- **Pydantic**: Validação de dados
-- **Pytest**: Testes unitários
-
-### Integrações
-- **Meta WhatsApp Cloud API**: Mensagens WhatsApp
-- **Google Calendar API**: Agendamento
-- **Twilio/Zenvia**: Provedores alternativos
-
-## 🚀 Instalação e Configuração
-
-### 1. Clone o repositório
+### 1. Deploy da API (Cloud Run)
 ```bash
-git clone https://github.com/seu-usuario/smartia.git
-cd smartia
+# O deploy é automático via GitHub Actions
+# Push para main → Deploy automático
 ```
 
-### 2. Instale dependências
+**Configuração manual (se necessário):**
 ```bash
-# Frontend
+# Build e push da imagem
+docker build -t gcr.io/$PROJECT_ID/smartia-agents-api ./services/api
+docker push gcr.io/$PROJECT_ID/smartia-agents-api
+
+# Deploy para Cloud Run
+gcloud run deploy smartia-agents-api \
+  --image gcr.io/$PROJECT_ID/smartia-agents-api \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --port 8080 \
+  --set-env-vars MOCK_MODE=true,ALLOW_ORIGINS=*
+```
+
+### 2. Deploy do Web App (Vercel)
+```bash
+# Deploy automático via GitHub Actions
+# Push para main → Deploy automático
+```
+
+**Configuração manual (se necessário):**
+```bash
+cd apps/web
+vercel --prod
+```
+
+## 🧪 Testes e Qualidade
+
+### Executar Testes Localmente
+```bash
+# Web App
+cd apps/web
+npm test
+npm run lint
+npm run type-check
+
+# API
+cd services/api
+pytest -v
+ruff check .
+black --check .
+```
+
+### CI/CD Pipeline
+- **Lint**: ESLint + Prettier (web), Ruff + Black (API)
+- **Testes**: Vitest (web), pytest (API)
+- **Build**: Next.js build, Docker build
+- **Deploy**: Vercel (web), Cloud Run (API)
+- **Security**: Trivy vulnerability scan
+
+## 🔧 Desenvolvimento Local
+
+### Web App
+```bash
 cd apps/web
 npm install
-
-# Backend
-cd ../api
-pip install -r requirements.txt
-```
-
-### 3. Configure variáveis de ambiente
-```bash
-# apps/api/.env
-META_VERIFY_TOKEN=your_meta_verify_token
-META_ACCESS_TOKEN=your_meta_access_token
-META_PHONE_NUMBER_ID=your_phone_number_id
-
-DATABASE_URL=sqlite:///./smartia.db
-
-# Google Calendar (opcional)
-GOOGLE_CREDENTIALS_PATH=credentials.json
-GOOGLE_TOKEN_PATH=token.json
-GOOGLE_CALENDAR_ID=primary
-CLINIC_TIMEZONE=America/Sao_Paulo
-
-# Provedores alternativos (opcional)
-TWILIO_ACCOUNT_SID=your_twilio_account_sid
-TWILIO_AUTH_TOKEN=your_twilio_auth_token
-TWILIO_WHATSAPP_NUMBER=your_twilio_whatsapp_number
-
-ZENVIA_API_KEY=your_zenvia_api_key
-ZENVIA_WHATSAPP_NUMBER=your_zenvia_whatsapp_number
-```
-
-### 4. Configure Google Calendar (opcional)
-```bash
-# Siga as instruções em apps/api/GOOGLE_CALENDAR_SETUP.md
-```
-
-### 5. Execute a aplicação
-```bash
-# Backend
-cd apps/api
-uvicorn main:app --reload
-
-# Frontend
-cd apps/web
 npm run dev
+# Acesse http://localhost:3000
 ```
 
-## 📱 Uso
-
-### 1. Landing Page
-- Acesse `http://localhost:3000`
-- Visualize componentes reutilizáveis
-- Teste responsividade
-
-### 2. Webhook WhatsApp
-- Configure webhook: `https://sua-api.com/webhook/meta`
-- Envie mensagens para testar fluxo
-- Monitore conversas no banco de dados
-
-### 3. Agendamento
-- Paciente envia "quero agendar"
-- Sistema pergunta data e horário
-- Confirma e cria evento no Google Calendar
-- Salva appointment no CRM
-
-### 4. Lembretes
+### API
 ```bash
-# Executar manualmente
-python run_reminders.py --job 24h
-python run_reminders.py --job 2h
-python run_reminders.py --job no-show
-
-# Via API
-curl -X POST http://localhost:8000/jobs/reminders/24h
+cd services/api
+python -m venv .venv
+source .venv/bin/activate  # Linux/Mac
+# .venv\Scripts\activate   # Windows
+pip install -r requirements.txt
+python app.py
+# API disponível em http://localhost:8080
 ```
 
-## 🧪 Testes
+## 📡 Endpoints da API
 
+### Simulação de Conversas
 ```bash
-cd apps/api
-python -m pytest tests/ -v
+POST /simulate/{agent}
+Content-Type: application/json
+
+{
+  "message": "oi",
+  "phone": "11999999999"
+}
 ```
 
-## 📊 Endpoints da API
+**Agentes disponíveis:**
+- `sdr` - Agent SDR
+- `ecom` - Agent E-commerce  
+- `auto` - Agent Autoatendimento
+- `rfm` - Agent RFM
 
-### Webhooks
-- `GET /webhook/{provider}` - Verificação de webhook
-- `POST /webhook/{provider}` - Receber mensagens
-- `GET /providers` - Listar provedores disponíveis
-
-### Calendário
-- `GET /calendar/slots` - Horários disponíveis
-- `GET /calendar/events/{id}` - Detalhes do evento
-- `DELETE /calendar/events/{id}` - Cancelar evento
-
-### CRM
-- `GET /patients` - Listar pacientes
-- `GET /patients/{id}` - Detalhes do paciente
-- `GET /appointments` - Listar consultas
-- `GET /metrics` - Métricas da clínica
-
-### Jobs
-- `POST /jobs/reminders/24h` - Lembretes 24h
-- `POST /jobs/reminders/2h` - Lembretes 2h
-- `POST /jobs/no-shows` - Tratar faltas
-- `GET /jobs/metrics` - Métricas de jobs
-
-## 🔧 Configuração de Produção
-
-### 1. Banco de Dados
+### Webhook WhatsApp
 ```bash
-# PostgreSQL
-DATABASE_URL=postgresql://user:pass@localhost/smartia
+POST /webhook/whatsapp
+Content-Type: application/json
 
-# MySQL
-DATABASE_URL=mysql://user:pass@localhost/smartia
+{
+  "message": "payload do WhatsApp"
+}
 ```
 
-### 2. Deploy
+### Health Check
 ```bash
-# Docker
-docker build -t smartia-api apps/api/
-docker run -p 8000:8000 smartia-api
-
-# Cloud Run
-gcloud run deploy smartia-api --source apps/api/
+GET /health
 ```
 
-### 3. Jobs Agendados
-```bash
-# Cron
-0 9 * * * cd /app && python run_reminders.py --job 24h
-0 * * * * cd /app && python run_reminders.py --job 2h
+## 🎯 State Machine
 
-# Cloud Scheduler
-# Configure via Google Cloud Console
-```
+Cada agente possui uma **state machine** que gerencia o fluxo da conversa:
 
-## 📈 Métricas Disponíveis
+- **INITIAL** → **QUALIFYING** → **PROPOSAL** → **CLOSING** → **COMPLETED**
 
-### CRM
-- Total de pacientes
-- Total de consultas
-- Taxa de confirmação
-- Taxa de conversão (lead → consulta)
+As sessões são mantidas em memória com ID único baseado em `phone + agent`.
 
-### Jobs
-- Lembretes enviados
-- Taxa de faltas
-- Taxa de conclusão
-- Mensagens de reengajamento
+## 🌐 URLs de Produção
 
-## 🤝 Contribuição
+Após o deploy, as URLs serão:
+- **Web App**: `https://smartia-web.vercel.app`
+- **API**: `https://smartia-agents-api-xxx.run.app`
 
-1. Fork o projeto
-2. Crie uma branch (`git checkout -b feature/nova-funcionalidade`)
-3. Commit suas mudanças (`git commit -am 'Adiciona nova funcionalidade'`)
-4. Push para a branch (`git push origin feature/nova-funcionalidade`)
-5. Abra um Pull Request
+## 📊 Monitoramento
 
-## 📄 Licença
+- **Vercel**: Dashboard de analytics e performance
+- **Cloud Run**: Logs e métricas no Google Cloud Console
+- **GitHub Actions**: Status dos workflows e deploys
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para detalhes.
+## 🔒 Segurança
 
-## 🆘 Suporte
+- Secrets gerenciados via GitHub Secrets
+- CORS configurado para produção
+- Health checks implementados
+- Vulnerabilidades escaneadas via Trivy
 
-- **Documentação**: Consulte os arquivos `.md` em cada diretório
-- **Issues**: Abra uma issue no GitHub
-- **Email**: contato@smartia.com.br
-
-## 🎯 Roadmap
-
-- [ ] Dashboard web para métricas
-- [ ] Integração com mais provedores
-- [ ] IA para análise de sentimento
-- [ ] Relatórios avançados
-- [ ] API de terceiros
-- [ ] Mobile app
-
----
-
-**SmartIA** - Transformando clínicas com inteligência artificial 🤖🏥
+## 📝 Licença
+MIT

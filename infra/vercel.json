@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "apps/web/package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "framework": "nextjs",
+  "env": {
+    "NEXT_PUBLIC_API_BASE": "https://<cloud-run-url>"
+  }
+}
