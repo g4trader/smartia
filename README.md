@@ -187,3 +187,4 @@ Após o deploy, as URLs serão:
 ## 📝 Licença
 MIT
 # Deploy test
+# Vercel token configured
