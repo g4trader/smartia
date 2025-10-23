@@ -1,0 +1,36 @@
+steps:
+  # Build the API Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/smartia-api', './apps/api']
+  
+  # Push the API image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/smartia-api']
+  
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'smartia-api'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/smartia-api'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '8000'
+      - '--memory'
+      - '1Gi'
+      - '--cpu'
+      - '1'
+      - '--max-instances'
+      - '10'
+      - '--set-env-vars'
+      - 'DATABASE_URL=sqlite:///./smartia.db,CLINIC_TIMEZONE=America/Sao_Paulo'
+
+images:
+  - 'gcr.io/$PROJECT_ID/smartia-api'
