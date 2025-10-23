@@ -108,7 +108,7 @@ export default function ChatSimulator(){
               {m.text}
             </div>
             <div className={`text-xs text-slate-500 mt-1 ${m.from==='user'?'text-right':''}`}>
-              {m.timestamp.toLocaleTimeString()}
+              {m.timestamp}
             </div>
           </div>
         ))}
