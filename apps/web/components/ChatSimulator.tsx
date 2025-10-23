@@ -5,7 +5,7 @@ type Agent = 'sdr'|'ecom'|'auto'|'rfm';
 type Message = {
   from: 'user'|'bot';
   text: string;
-  timestamp: Date;
+  timestamp: string;
   state?: string;
 };
 
@@ -19,7 +19,7 @@ const AGENT_DESCRIPTIONS = {
 export default function ChatSimulator(){
   const [agent, setAgent] = useState<Agent>('sdr');
   const [messages, setMessages] = useState<Message[]>([
-    {from:'bot', text:'Olá! Eu sou seu agente inteligente. Como posso ajudar?', timestamp: new Date()}
+    {from:'bot', text:'Olá! Eu sou seu agente inteligente. Como posso ajudar?', timestamp: new Date().toLocaleTimeString()}
   ]);
   const [input, setInput] = useState('');
   const [currentState, setCurrentState] = useState('initial');
@@ -28,7 +28,7 @@ export default function ChatSimulator(){
 
   // Reset conversation when agent changes
   useEffect(() => {
-    setMessages([{from:'bot', text:'Olá! Eu sou seu agente inteligente. Como posso ajudar?', timestamp: new Date()}]);
+    setMessages([{from:'bot', text:'Olá! Eu sou seu agente inteligente. Como posso ajudar?', timestamp: new Date().toLocaleTimeString()}]);
     setCurrentState('initial');
   }, [agent]);
 
@@ -38,7 +38,7 @@ export default function ChatSimulator(){
     const userMsg: Message = {
       from: 'user', 
       text: input.trim(),
-      timestamp: new Date()
+      timestamp: new Date().toLocaleTimeString()
     };
     setMessages(prev=>[...prev, userMsg]);
     setInput('');
@@ -57,16 +57,16 @@ export default function ChatSimulator(){
       const botMsg: Message = {
         from: 'bot', 
         text: data.reply || '...',
-        timestamp: new Date(),
+        timestamp: new Date().toLocaleTimeString(),
         state: data.state
       };
       setMessages(prev=>[...prev, botMsg]);
       setCurrentState(data.state || 'initial');
     }catch(e){
       const errorMsg: Message = {
-        from: 'bot', 
+        from: 'bot',
         text: '[erro de demo]: verifique se a API está rodando',
-        timestamp: new Date()
+        timestamp: new Date().toLocaleTimeString()
       };
       setMessages(prev=>[...prev, errorMsg]);
     } finally {
