@@ -24,7 +24,7 @@ export default function ChatSimulator(){
   const [input, setInput] = useState('');
   const [currentState, setCurrentState] = useState('initial');
   const [isLoading, setIsLoading] = useState(false);
-  const base = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5055';
+  const base = process.env.NEXT_PUBLIC_API_BASE || 'https://smartia-api-642830139828.us-central1.run.app';
 
   // Reset conversation when agent changes
   useEffect(() => {
