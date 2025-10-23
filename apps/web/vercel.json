@@ -1,20 +1,8 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "env": {
-    "NEXT_PUBLIC_WHATSAPP_NUMBER": "@whatsapp_number",
-    "NEXT_PUBLIC_API_URL": "@api_url"
-  },
-  "functions": {
-    "apps/web/pages/api/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
   "headers": [
     {
       "source": "/(.*)",
