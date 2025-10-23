@@ -1,4 +1,3 @@
-import './globals.css';
 import ChatSimulator from '@/components/ChatSimulator';
 
 export default function Page(){
